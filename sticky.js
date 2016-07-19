@@ -96,6 +96,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var lastDownTarget = undefined;
 	
 	    svg.addEventListener('mousedown', function (e) {
+	      normalizeEvent(e);
 	      // lastDownTarget = svg;
 	      _this.lastSelected = null;
 	      if (e.target.type === 'wire') {
@@ -149,10 +150,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	
 	    svg.addEventListener('mousemove', function (e) {
+	      normalizeEvent(e);
+	
 	      return _this.attachMove(e);
 	    });
 	
 	    svg.addEventListener('mousemove', function (e) {
+	      normalizeEvent(e);
+	
 	      if (_this.dragging) {
 	        var wrapper = _this.dragging.wrapper;
 	        var SVGbox = wrapper._svg.getBoundingClientRect();
@@ -658,8 +663,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  return Sticky;
 	}();
-
+	
 	exports.default = Sticky;
+	
+	
+	var normalizeEvent = function normalizeEvent(e) {
+	  if (!e.x) e.x = e.clientX;
+	  if (!e.y) e.y = e.clientY;
+	};
 
 /***/ },
 /* 1 */
@@ -735,7 +746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function spliceByIndex(arr, obj) {
 	  var index = arr.indexOf(obj);
-	  console.log(index);
+	
 	  if (index != -1) {
 	    arr.splice(index, 1);
 	    return true;
@@ -853,10 +864,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  arrangePorts: function arrangePorts() {},
 	  delete: function _delete() {
-	    this.wires.forEach(function (wire) {
-	      return wire.delete();
-	    });
-	    this.detach();
+	    for (var i = this.wires.length - 1; i >= 0; i--) {
+	      this.wires[i].delete();
+	    }this.detach();
 	  },
 	  updateWires: function updateWires() {
 	    this.wires.forEach(function (wire) {
