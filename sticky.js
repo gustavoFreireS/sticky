@@ -83,7 +83,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _classCallCheck(this, Sticky);
 	
 	    this.el = document.getElementById(id);
+	
 	    if (!this.el) throw "Couldn't find element :(";
+	
 	    var svg = Sticky.createElement('svg', { class: 'svg-content', viewBox: "0 0 800 600", preserveAspectRatio: "xMidYMid meet" });
 	    // let svg = Sticky.createElement('svg', { class: 'svg-content', width: 800, height: 400 });
 	    this._uid = 0;
@@ -99,10 +101,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      normalizeEvent(e);
 	      // lastDownTarget = svg;
 	      _this.lastSelected = null;
+	
 	      if (e.target.type === 'wire') {
 	        _this.lastSelected = e.target.wrapper;
 	        return _this.selectedWire = e.target.wrapper;
 	      }
+	
 	      if (e.target.type === 'port' && e.target.dir === 'out') {
 	        return _this.startAttach(e.target);
 	      }
@@ -173,6 +177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    this._svg = svg;
 	    this.el.appendChild(this._svg);
+	    this.matchViewBox();
 	
 	    this.registerBlock('start', {
 	      width: 35, height: 60, rx: 10, ry: 10, fill: '#AF2B37', ports: { data_in: 0, data_out: 0, flow_in: 0, flow_out: 1 },
@@ -195,6 +200,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	
 	  _createClass(Sticky, [{
+	    key: 'matchViewBox',
+	    value: function matchViewBox() {
+	      var _svg$getBoundingClien = this._svg.getBoundingClientRect();
+	
+	      var width = _svg$getBoundingClien.width;
+	      var height = _svg$getBoundingClien.height;
+	
+	
+	      this._svg.setAttribute('viewBox', '0, 0, ' + width + ' ' + height);
+	    }
+	  }, {
 	    key: 'Brick',
 	    value: function Brick(name, attrs) {
 	      var el = Sticky.createElement(name, attrs);
