@@ -60,6 +60,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _Wire = __webpack_require__(1);
@@ -90,12 +92,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // let svg = Sticky.createElement('svg', { class: 'svg-content', width: 800, height: 400 });
 	    this._uid = 0;
 	    this._aux = {};
-	    this._blocks = {};
+	    this.blocks = {};
 	    this._objects = [];
 	    this._wires = [];
 	    this._state = null;
 	
-	    var lastDownTarget = undefined;
+	    var lastDownTarget = void 0;
 	
 	    svg.addEventListener('mousedown', function (e) {
 	      normalizeEvent(e);
@@ -179,14 +181,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.el.appendChild(this._svg);
 	    this.matchViewBox();
 	
-	    this.registerBlock('start', {
-	      width: 35, height: 60, rx: 10, ry: 10, fill: '#AF2B37', ports: { data_in: 0, data_out: 0, flow_in: 0, flow_out: 1 },
-	      title: '',
-	      icon: 'img/icon.png',
-	      behavior: function behavior() {
-	        return 0;
-	      }
-	    });
 	    // this.registerBlock('actuator', ActuatorBrick);
 	
 	    this.clearCanvas();
@@ -424,20 +418,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'registerBlock',
 	    value: function registerBlock(name, obj) {
-	      this._blocks[name] = obj;
-	      this._blocks[name].id = name;
-	
-	      if (obj.behavior && typeof obj.behavior !== 'function') {
-	        this._blocks[name].behavior = new Function('findById', obj.behavior);
-	      }
+	      this.blocks[name] = _extends({}, obj, {
+	        id: name,
+	        behavior: typeof obj.behavior !== 'function' ? new Function('findById', obj.behavior) : obj.behavior
+	      });
 	    }
 	  }, {
 	    key: 'createBlock',
 	    value: function createBlock(name) {
 	      var data = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
-	      if (!this._blocks[name]) throw "Block not registered";
-	      return Object.assign(new _Brick3.default(this._blocks[name]), data);
+	      var cfg = this.blocks[name] || this.__blocks[name];
+	
+	      if (!cfg) throw "Block not registered";
+	
+	      return Object.assign(new _Brick3.default(cfg), data);
 	    }
 	  }, {
 	    key: 'findById',
@@ -545,17 +540,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      try {
 	        for (var _iterator7 = data[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	          var block = _step7.value;
+	          var _block = _step7.value;
 	
-	          var blocky = this.findById(block.id);
-	          console.log(blocky, block.id);
+	          var blocky = this.findById(_block.id);
+	          console.log(blocky, _block.id);
 	
 	          var _iteratorNormalCompletion8 = true;
 	          var _didIteratorError8 = false;
 	          var _iteratorError8 = undefined;
 	
 	          try {
-	            for (var _iterator8 = block.ports.out[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	            for (var _iterator8 = _block.ports.out[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
 	              var port = _step8.value;
 	
 	              if (!port[0]) {
@@ -592,16 +587,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var _iteratorError9 = undefined;
 	
 	          try {
-	            for (var _iterator9 = block.ports.flow_out[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	              var port = _step9.value;
+	            for (var _iterator9 = _block.ports.flow_out[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	              var _port = _step9.value;
 	
-	              console.log(port);
-	              if (!port[0]) {
+	              console.log(_port);
+	              if (!_port[0]) {
 	                console.log('end of flux');
 	                break;
 	              }
-	              var blocky2 = this.findById(port[0].brick);
-	              var _wire3 = new _Wire2.default(blocky._ports['flow_out'][0], blocky2._ports['flow_in'][0]);
+	              var _blocky = this.findById(_port[0].brick);
+	              var _wire3 = new _Wire2.default(blocky._ports['flow_out'][0], _blocky._ports['flow_in'][0]);
 	              this.addElement(_wire3._el);
 	
 	              if (_wire3.seal()) {
@@ -645,9 +640,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'run',
 	    value: function run() {
 	      var block = this._objects[0],
-	          flow = undefined,
-	          id = undefined,
-	          refBlock = undefined;
+	          flow = void 0,
+	          id = void 0,
+	          refBlock = void 0;
 	      console.log(block);
 	
 	      // flow = start.behavior();
@@ -675,6 +670,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        el.setAttribute(key, attrs[key]);
 	      }return el;
 	    }
+	  }, {
+	    key: 'registerBlock',
+	    value: function registerBlock(name, obj) {
+	      this.prototype.__blocks[name] = _extends({}, obj, {
+	        id: name,
+	        behavior: typeof obj.behavior !== 'function' ? new Function('findById', obj.behavior) : obj.behavior
+	      });
+	    }
+	  }, {
+	    key: 'createBlock',
+	    value: function createBlock(name) {
+	      var data = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	      var cfg = this.prototype.__blocks[name];
+	
+	      if (!cfg) throw "Block not registered";
+	
+	      return Object.assign(new _Brick3.default(cfg), data);
+	    }
 	  }]);
 	
 	  return Sticky;
@@ -683,9 +697,92 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = Sticky;
 	
 	
+	Sticky.prototype.__blocks = {
+	  'start': {
+	    width: 35,
+	    height: 60,
+	    rx: 10,
+	    ry: 10,
+	    fill: '#AF2B37',
+	    ports: { data_in: 0, data_out: 0, flow_in: 0, flow_out: 1 },
+	    title: '',
+	    icon: 'img/icon.png',
+	    behavior: function behavior() {
+	      return 0;
+	    }
+	  },
+	  'Source': {
+	    fill: '#4fec2f',
+	    ports: { data_in: 0, data_out: 1, flow_in: 0, flow_out: 0 },
+	    title: 'Source Block',
+	    gui: {
+	      // select: { label: 'Select', type: 'select', options: ['USA', 'BR', 'CND'] },
+	      // text: { label: 'Text', type: 'text' },
+	      number: { label: 'Number', type: 'number' }
+	    },
+	    behavior: function behavior() {
+	      console.log(this._ports);
+	      return [this.inputs.number];
+	    }
+	  },
+	  'Comparison': {
+	    fill: '#4fec2f',
+	    ports: { data_in: 2, data_out: 1, flow_in: 0, flow_out: 0 },
+	    title: 'Comparison Block',
+	    gui: {
+	      op: { label: 'Operation', type: 'select', options: ['==', '!=', '===', '!==', '>', '>=', '<', '<='] }
+	    },
+	    behavior: function behavior(findById) {
+	      var conn1 = this._ports['in'][0]._conn[0];
+	      var conn2 = this._ports['in'][1]._conn[0];
+	      var brick1 = findById(conn1.brick);
+	      var brick2 = findById(conn2.brick);
+	      var val1 = brick1.behavior(findById)[conn1.id];
+	      var val2 = brick2.behavior(findById)[conn2.id];
+	
+	      return [eval(val1 + ' ' + this.inputs.op + ' ' + val2)];
+	    }
+	  },
+	  'Actuator': {
+	    fill: '#673A7E',
+	    ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
+	    title: 'Actuator Block',
+	    behavior: '\n    console.log(this);\n    alert(this.value);\n    return 0;\n    '
+	  },
+	  'Alert': {
+	    fill: '#EC962F',
+	    ports: { data_in: 1, data_out: 0, flow_in: 1, flow_out: 1 },
+	    title: 'Alert Block',
+	    behavior: function behavior(findById) {
+	      var conn = this._ports['in'][0]._conn[0];
+	      console.log(conn, conn.brick);
+	      var brick = findById(conn.brick);
+	      var data = brick.behavior(findById)[conn.id];
+	      alert(data);
+	
+	      return 0;
+	    }
+	  },
+	  'Sum': {
+	    fill: '#3e67c2',
+	    ports: { data_in: 2, data_out: 1, flow_in: 0, flow_out: 0 },
+	    title: 'Sum Block',
+	    behavior: function behavior(findById) {
+	      var val1 = this._ports['in'][0]._conn[0];
+	      var val2 = this._ports['in'][1]._conn[0];
+	      var brick = findById(val1.brick);
+	      var data = brick.behavior(findById)[val2.id];
+	      brick = findById(val2.brick);
+	      data += brick.behavior(findById)[val2.id];
+	
+	      return [data];
+	    }
+	  }
+	};
+	
 	var normalizeEvent = function normalizeEvent(e) {
-	  if (!e.x) e.x = e.clientX;
-	  if (!e.y) e.y = e.clientY;
+	  if (e.x == undefined) e.x = e.clientX;
+	  if (e.y == undefined) e.y = e.clientY;
 	};
 	module.exports = exports['default'];
 
@@ -800,6 +897,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
 	exports.default = Brick;
 	
 	var _ports = __webpack_require__(4);
@@ -810,20 +910,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function Brick(_ref) {
-	  var behavior = _ref.behavior;
-	  var title = _ref.title;
-	  var ports = _ref.ports;
-	  var icon = _ref.icon;
-	  var gui = _ref.gui;
-	  var id = _ref.id;
-	  var x = _ref.x;
-	  var y = _ref.y;
+	function Brick() {
+	  var custom = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
-	  this._el = (0, _blockBuilder2.default)(arguments[0]);
-	  this._el.wrapper = this;
+	  var cfg = _extends({
+	    strokeWidth: 3,
+	    marginLeft: 10,
+	    width: 220,
+	    opacity: 1,
+	    height: 50,
+	    rx: 20,
+	    ry: 20,
+	    fill: '#1F8244',
+	    stroke: '#000000',
+	    gui: {}
+	  }, custom);
+	
+	  var behavior = cfg.behavior;
+	  var title = cfg.title;
+	  var ports = cfg.ports;
+	  var icon = cfg.icon;
+	  var gui = cfg.gui;
+	  var id = cfg.id;
+	  var x = cfg.x;
+	  var y = cfg.y;
 	
 	  // this._id = id;
+	
+	  this.inputs = {};
+	  this._el = (0, _blockBuilder2.default)(this, cfg);
 	  this.behavior = behavior;
 	  this._container = null;
 	  this._refBlock = id;
@@ -840,7 +955,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._aux = { attaching: {} };
 	  this._states = { dragging: false };
 	
-	  arrangePorts.call(this, ports);
+	  arrangePorts.call(this, ports, gui);
 	
 	  return this;
 	}
@@ -916,16 +1031,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	function arrangePorts() {
-	  var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
-	  var _ref2$data_in = _ref2.data_in;
-	  var data_in = _ref2$data_in === undefined ? 1 : _ref2$data_in;
-	  var _ref2$data_out = _ref2.data_out;
-	  var data_out = _ref2$data_out === undefined ? 1 : _ref2$data_out;
-	  var _ref2$flow_in = _ref2.flow_in;
-	  var flow_in = _ref2$flow_in === undefined ? 1 : _ref2$flow_in;
-	  var _ref2$flow_out = _ref2.flow_out;
-	  var flow_out = _ref2$flow_out === undefined ? 1 : _ref2$flow_out;
+	  var _ref$data_in = _ref.data_in;
+	  var data_in = _ref$data_in === undefined ? 1 : _ref$data_in;
+	  var _ref$data_out = _ref.data_out;
+	  var data_out = _ref$data_out === undefined ? 1 : _ref$data_out;
+	  var _ref$flow_in = _ref.flow_in;
+	  var flow_in = _ref$flow_in === undefined ? 1 : _ref$flow_in;
+	  var _ref$flow_out = _ref.flow_out;
+	  var flow_out = _ref$flow_out === undefined ? 1 : _ref$flow_out;
+	  var gui = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 	
 	  var radius = 10;
 	  var dist = 10; //distance beetween ports
@@ -938,7 +1054,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // var maxPorts = Math.max(ports.in.length, ports.out.length);
 	  var Radius = radius + strokeWidth / 2; //total radius -> circle radius plus its stroke width
 	  var tRadius = dist + Radius;
-	  var height = (dist + Radius * 2) * maxPorts + dist; //dist + diameter * number of ports + final dist
+	  var height = (dist + Radius * 2) * Math.max(maxPorts, 1 + Object.keys(gui).length) + dist; //dist + diameter * number of ports + final dist
 	  var width = main.getAttribute('width') * 1;
 	
 	  this._ports.in = [];
@@ -965,11 +1081,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  for (i = 0; i < data_in; i++, y += ds) {
-	    var port = new _ports.DataPort(i, 'in', this);
-	    port.attr('cx', Radius);
-	    port.attr('cy', y);
-	    ports.in.push(port);
-	    this._el.appendChild(port._el);
+	    var _port = new _ports.DataPort(i, 'in', this);
+	    _port.attr('cx', Radius);
+	    _port.attr('cy', y);
+	    ports.in.push(_port);
+	    this._el.appendChild(_port._el);
 	  }
 	
 	  ds = height / (data_out + flow_out);
@@ -977,19 +1093,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //cuz it means the missing half for the current circle and the initial half for the next circle
 	  //so every 'y' means one center of circle
 	  for (i = 0; i < flow_out; i++, y += ds) {
-	    var port = new _ports.FlowPort(i, 'out', this);
-	    port.attr('cx', width + Radius);
-	    port.attr('cy', y);
-	    ports.flow_out.push(port);
-	    this._el.appendChild(port._el);
+	    var _port2 = new _ports.FlowPort(i, 'out', this);
+	    _port2.attr('cx', width + Radius);
+	    _port2.attr('cy', y);
+	    ports.flow_out.push(_port2);
+	    this._el.appendChild(_port2._el);
 	  }
 	
 	  for (i = 0; i < data_out; i++, y += ds) {
-	    var port = new _ports.DataPort(i, 'out', this);
-	    port.attr('cx', width + Radius);
-	    port.attr('cy', y);
-	    ports.out.push(port);
-	    this._el.appendChild(port._el);
+	    var _port3 = new _ports.DataPort(i, 'out', this);
+	    _port3.attr('cx', width + Radius);
+	    _port3.attr('cy', y);
+	    ports.out.push(_port3);
+	    this._el.appendChild(_port3._el);
 	  }
 	}
 	module.exports = exports['default'];
@@ -1125,6 +1241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	// module.exports = Port;
+	
 	module.exports = exports['default'];
 
 /***/ },
@@ -1145,36 +1262,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	// function SVGBuilder({ strokeWidth, marginLeft, width, opacity, height, rx, ry, fill, stroke, ...rest }) {
-	function blockBuilder(_ref) {
-	  var strokeWidth = _ref.strokeWidth;
-	  var marginLeft = _ref.marginLeft;
-	  var width = _ref.width;
-	  var opacity = _ref.opacity;
-	  var height = _ref.height;
-	  var rx = _ref.rx;
-	  var ry = _ref.ry;
-	  var fill = _ref.fill;
-	  var stroke = _ref.stroke;
-	  var title = _ref.title;
-	
+	function blockBuilder(wrapper, cfg) {
+	  var strokeWidth = cfg.strokeWidth;
+	  var marginLeft = cfg.marginLeft;
+	  var width = cfg.width;
+	  var opacity = cfg.opacity;
+	  var height = cfg.height;
+	  var rx = cfg.rx;
+	  var ry = cfg.ry;
+	  var fill = cfg.fill;
+	  var stroke = cfg.stroke;
+	  var title = cfg.title;
+	  var gui = cfg.gui;
 	  // { strokeWidth = 3, marginLeft = 10, width = 150, opacity = 1, height = 50, rx = 20, ry = 20, fill = '#1F8244', stroke = '#000000' }
-	  strokeWidth = strokeWidth || 3;
-	  marginLeft = marginLeft || 10;
-	  width = width || 150;
-	  opacity = opacity || 1;
-	  height = height || 50;
-	  rx = rx || 20;
-	  ry = ry || 20;
-	  fill = fill || '#1F8244';
-	  stroke = '#000000';
 	
 	  var svg = (0, _utils2.default)('svg');
+	  svg.wrapper = wrapper;
 	
 	  var attrs = {
 	    x: marginLeft + strokeWidth / 2,
 	    y: strokeWidth / 2,
 	    width: width,
-	    height: height,
+	    height: height + Object.keys(gui).length * 25,
 	    rx: rx,
 	    ry: ry,
 	    'stroke-width': strokeWidth,
@@ -1192,19 +1301,96 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  svg.appendChild(rect);
 	  svg.appendChild(text);
+	
+	  var foreign = (0, _utils2.default)('foreignObject', { class: 'sticky-gui', x: 25, y: 40, width: 120 });
+	  var body = document.createElement('body');
+	  body.xmlns = 'http://www.w3.org/1999/xhtml';
+	  // body.style.margin = '0';
+	
+	  Object.keys(gui).forEach(function (input) {
+	    var label = void 0;
+	    var obj = gui[input];
+	    var noop = function noop() {};
+	    var createHandler = function createHandler() {
+	      var f = arguments.length <= 0 || arguments[0] === undefined ? noop : arguments[0];
+	      return function (e) {
+	        svg.wrapper.inputs[input] = f(e.target.value);
+	      };
+	    };
+	
+	    switch (obj.type) {
+	      case 'number':
+	        {
+	          label = createLabel(obj.label, obj.type, createHandler(Number));
+	        }break;
+	      case 'text':
+	        {
+	          label = createLabel(obj.label, obj.type, createHandler());
+	        }break;
+	      case 'select':
+	        {
+	          label = createSelect(obj.label, obj.options, createHandler());
+	        }break;
+	    }
+	
+	    body.appendChild(label);
+	  });
+	
+	  foreign.appendChild(body);
+	  svg.appendChild(foreign);
+	
 	  return svg;
 	}
 	
-	blockBuilder.prototype = {};
-	
-	var test = {
+	var example = {
 	  fill: '#31dfaf',
 	  border: '#e695bf',
 	  ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-	  title: 'Test Block',
+	  title: 'Example Block',
 	  icon: 'img/icon.png',
-	  gui: [{ type: 'select', options: ['USA', 'BR', 'CND'] }, { type: 'text' }, { type: 'number' }]
+	  gui: {
+	    select: { label: 'Select', type: 'select', options: ['USA', 'BR', 'CND'] },
+	    text: { label: 'Text', type: 'text' },
+	    number: { label: 'Number', type: 'number' }
+	  }
+	};
 	
+	var createLabel = function createLabel(_label, type, onChange) {
+	  var label = document.createElement('label');
+	  var txt = document.createTextNode(_label + ': ');
+	  var input = document.createElement('input');
+	  input.type = type;
+	
+	  input.addEventListener('change', onChange);
+	  onChange({ target: input });
+	  // input.style.width = '100%';
+	
+	  label.appendChild(txt);
+	  label.appendChild(input);
+	
+	  return label;
+	};
+	
+	var createSelect = function createSelect(_label, options, onChange) {
+	  var label = document.createElement('label');
+	  var txt = document.createTextNode(_label + ': ');
+	  var select = document.createElement('select');
+	
+	  options.forEach(function (value) {
+	    var option = document.createElement('option');
+	    option.value = option.text = value;
+	
+	    select.add(option, null);
+	  });
+	
+	  select.addEventListener('change', onChange);
+	  onChange({ target: select });
+	  // input.style.width = '100%';
+	
+	  label.appendChild(txt);
+	  label.appendChild(select);
+	
+	  return label;
 	};
 	module.exports = exports['default'];
 
