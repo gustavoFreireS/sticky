@@ -430,7 +430,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	      var cfg = this.blocks[name] || this.__blocks[name];
 	
-	      if (!cfg) throw "Block not registered";
+	      if (!cfg) throw 'Block \'' + name + '\' not registered';
 	
 	      return Object.assign(new _Brick3.default(cfg), data);
 	    }
@@ -650,7 +650,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // it'll be useful for if block
 	
 	      do {
-	        refBlock = this._blocks[block._refBlock];
+	        refBlock = this.blocks[block._refBlock] || this.__blocks[block._refBlock];
 	        flow = refBlock.behavior.call(block, this.findById.bind(this));
 	        // console.log(block._ports);
 	        id = block._ports['flow_out'][flow]._conn[0] ? block._ports['flow_out'][flow]._conn[0].brick : null;
@@ -699,6 +699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	Sticky.prototype.__blocks = {
 	  'start': {
+	    id: 'start',
 	    width: 35,
 	    height: 60,
 	    rx: 10,
@@ -712,20 +713,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 	  'Source': {
+	    id: 'Source',
 	    fill: '#4fec2f',
 	    ports: { data_in: 0, data_out: 1, flow_in: 0, flow_out: 0 },
 	    title: 'Source Block',
 	    gui: {
-	      // select: { label: 'Select', type: 'select', options: ['USA', 'BR', 'CND'] },
-	      // text: { label: 'Text', type: 'text' },
 	      number: { label: 'Number', type: 'number' }
 	    },
 	    behavior: function behavior() {
-	      console.log(this._ports);
 	      return [this.inputs.number];
 	    }
 	  },
 	  'Comparison': {
+	    id: 'Comparison',
 	    fill: '#4fec2f',
 	    ports: { data_in: 2, data_out: 1, flow_in: 0, flow_out: 0 },
 	    title: 'Comparison Block',
@@ -743,39 +743,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return [eval(val1 + ' ' + this.inputs.op + ' ' + val2)];
 	    }
 	  },
-	  'Actuator': {
-	    fill: '#673A7E',
-	    ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-	    title: 'Actuator Block',
-	    behavior: '\n    console.log(this);\n    alert(this.value);\n    return 0;\n    '
-	  },
 	  'Alert': {
+	    id: 'Alert',
 	    fill: '#EC962F',
 	    ports: { data_in: 1, data_out: 0, flow_in: 1, flow_out: 1 },
 	    title: 'Alert Block',
 	    behavior: function behavior(findById) {
 	      var conn = this._ports['in'][0]._conn[0];
-	      console.log(conn, conn.brick);
 	      var brick = findById(conn.brick);
 	      var data = brick.behavior(findById)[conn.id];
+	
 	      alert(data);
 	
 	      return 0;
 	    }
 	  },
 	  'Sum': {
+	    id: 'Sum',
 	    fill: '#3e67c2',
 	    ports: { data_in: 2, data_out: 1, flow_in: 0, flow_out: 0 },
 	    title: 'Sum Block',
 	    behavior: function behavior(findById) {
-	      var val1 = this._ports['in'][0]._conn[0];
-	      var val2 = this._ports['in'][1]._conn[0];
-	      var brick = findById(val1.brick);
-	      var data = brick.behavior(findById)[val2.id];
-	      brick = findById(val2.brick);
-	      data += brick.behavior(findById)[val2.id];
+	      var conn1 = this._ports['in'][0]._conn[0];
+	      var conn2 = this._ports['in'][1]._conn[0];
+	      var brick1 = findById(conn1.brick);
+	      var brick2 = findById(conn2.brick);
+	      var val1 = brick1.behavior(findById)[conn1.id];
+	      var val2 = brick2.behavior(findById)[conn2.id];
 	
-	      return [data];
+	      return [val1 + val2];
+	    }
+	  },
+	  'If': {
+	    id: 'If',
+	    fill: '#3e67c2',
+	    ports: { data_in: 1, data_out: 0, flow_in: 1, flow_out: 2 },
+	    title: 'If Block',
+	    behavior: function behavior(findById) {
+	      var conn = this._ports['in'][0]._conn[0];
+	      var brick = findById(conn.brick);
+	      var data = brick.behavior(findById)[conn.id];
+	
+	      return data ? 0 : 1;
 	    }
 	  }
 	};
@@ -1310,9 +1319,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Object.keys(gui).forEach(function (input) {
 	    var label = void 0;
 	    var obj = gui[input];
-	    var noop = function noop() {};
+	    var _id = function _id(v) {
+	      return v;
+	    };
 	    var createHandler = function createHandler() {
-	      var f = arguments.length <= 0 || arguments[0] === undefined ? noop : arguments[0];
+	      var f = arguments.length <= 0 || arguments[0] === undefined ? _id : arguments[0];
 	      return function (e) {
 	        svg.wrapper.inputs[input] = f(e.target.value);
 	      };
