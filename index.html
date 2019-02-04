@@ -22,7 +22,7 @@
     <br/>
     <input id="left" type="button" value="left"/> 
     <input id="right" type="button" value="right"/> 
-    <input id="top" type="button" value="top"/> 
+    <input id="up" type="button" value="up"/>
     <input id="down" type="button" value="down"/> 
     <input id="run" type="button" value="Run"/> 
 
@@ -98,7 +98,7 @@
 
       };
 
-      ['Left', 'Top', 'Right', 'Down'].forEach(function(dir) {
+      ['Left', 'Up', 'Right', 'Down'].forEach(function(dir) {
         document.getElementById(dir.toLowerCase()).onclick = function() {
           var rect = canvas.createBlock('Push' + dir);
           rect.x = 150; rect.y = 200;
