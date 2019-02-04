@@ -66,6 +66,7 @@
         <li><button id="down" type="button">Down</button></li>
         <li><button id="left" type="button">Left</button></li>
         <li><button id="right" type="button">Right</button></li>
+        <li><button id="reset" type="button">Reset</button></li>
         <li><button id="run" type="button">Run</button></li>
       </ul>
     </div>
@@ -143,6 +144,10 @@
 
       };
 
+      document.getElementById('reset').onclick = function() {
+        game.reset();
+      };
+
       ['Left', 'Up', 'Right', 'Down'].forEach(function(dir) {
         document.getElementById(dir.toLowerCase()).onclick = function() {
           var rect = canvas.createBlock('Push' + dir);
@@ -150,13 +155,16 @@
           canvas.addObj(rect);
         };
       });
-      var map = [
-        "10100000",
-        "00110101",
-        "01000101",
-        "00101000",
-        "10001011"
-      ];
+      var map = {
+        initialPos: [1, 0],
+        tiled: [
+          "10100000",
+          "00110101",
+          "01000101",
+          "00101000",
+          "10001011"
+        ]
+      };
 
       var map2 = [
         "0000000000",
