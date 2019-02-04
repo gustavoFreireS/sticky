@@ -120,15 +120,26 @@
 
       Object.keys(blockConfig).forEach(key => canvas.registerBlock(key, blockConfig[key]));
 
+      function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function addBlock(direction) {
+        var rect = canvas.createBlock('Push' + direction);
+        rect.x = 150 + getRandomInt(-10, 10);
+        rect.y = 200 + getRandomInt(-10, 10);
+
+        canvas.addObj(rect);
+      }
+
       window.addEventListener('keyup', function(e) {
         var translate = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
         var direction = translate[e.keyCode];
 
         if (direction) {
-          var rect = canvas.createBlock('Push' + direction);
-          rect.x = 150; rect.y = 200;
-
-          canvas.addObj(rect);
+          addBlock(diretion);
         }
       });
 
@@ -148,9 +159,7 @@
 
       ['Left', 'Up', 'Right', 'Down'].forEach(function(dir) {
         document.getElementById(dir.toLowerCase()).onclick = function() {
-          var rect = canvas.createBlock('Push' + dir);
-          rect.x = 150; rect.y = 200;
-          canvas.addObj(rect);
+          addBlock(dir);
         };
       });
       var map = {
