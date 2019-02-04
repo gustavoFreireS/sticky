@@ -79,48 +79,46 @@
       var game = new DumbBox('canvas', { controls: false });
       var canvas = new Sticky('test');
       var sum = [];
+      var blockConfig = {
+        'PushUp': {
+          fill: '#F5E867',
+          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
+          title: 'Up',
+          behavior: function () {
+            sum.push('up');
+            return 0;
+          }
+        },
+        'PushDown': {
+          fill: '#FF8D4F',
+          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
+          title: 'Down',
+          behavior: function () {
+            sum.push('down');
+            return 0;
+          }
+        },
+        'PushLeft': {
+          fill: '#D592F7',
+          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
+          title: 'Left',
+          behavior: function () {
+            sum.push('left');
+            return 0;
+          }
+        },
+        'PushRight': {
+          fill: '#289E71',
+          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
+          title: 'Right',
+          behavior: function () {
+            sum.push('right');
+            return 0;
+          }
+        },
+      };
 
-      canvas.registerBlock('PushLeft', {
-        fill: '#673A7E',
-        ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-        title: 'Left',
-        behavior: function() {
-          sum.push('left');
-          return 0;
-        }
-      });
-
-
-      canvas.registerBlock('PushRight', {
-        fill: '#4fec2f',
-        ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-        title: 'Right',
-        behavior: function() {
-          sum.push('right');
-          return 0;
-        }
-      });
-
-
-      canvas.registerBlock('PushUp', {
-        fill: '#EC962F',
-        ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-        title: 'Up',
-        behavior: function() {
-          sum.push('up');
-          return 0;
-        }
-      });
-
-      canvas.registerBlock('PushDown', {
-        fill: '#3e67c2',
-        ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-        title: 'Down',
-        behavior: function() {
-          sum.push('down');
-          return 0;
-        }
-      });
+      Object.keys(blockConfig).forEach(key => canvas.registerBlock(key, blockConfig[key]));
 
       window.addEventListener('keyup', function(e) {
         var translate = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
