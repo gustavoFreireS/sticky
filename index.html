@@ -1,185 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Sticky.js example - DumbBox</title>
+    <title>Sticky.js examples</title>
     <style>
       body {
         font-family: 'Work Sans', sans-serif;
       }
-
-      #test {
-        border: 1px solid black;
-        width: 800px;
-        height: 600px;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        cursor: default;
-      }
-
-      #container {
-        display: inline-block;
-        position: relative;
-        vertical-align: top;
-      }
-      .button-list {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 120px;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      }
-
-      .button-list button {
-        width: 100%;
-        background: #111;
-        text-align: center;
-        touch-callout: none;
-        user-select: none;
-        display: inline-block;
-        border: .2em solid;
-        position: relative;
-        cursor: pointer;display: block;
-        padding:1em 2em;
-        text-transform: uppercase;
-        font-weight: bold;
-        overflow: hidden;
-        opacity: 0.9;
-        color: #FFF;
-      }
-
-      .button-list button:active {
-        opacity: 1;
-        background: white;
-        color: inherit;
-      }
     </style>
   </head>
   <body>
-    <div id="container">
-      <div id="test"></div>
-      <ul class="button-list">
-        <li><button id="up" type="button">Up</button></li>
-        <li><button id="down" type="button">Down</button></li>
-        <li><button id="left" type="button">Left</button></li>
-        <li><button id="right" type="button">Right</button></li>
-        <li><button id="reset" type="button">Reset</button></li>
-        <li><button id="run" type="button">Run</button></li>
-      </ul>
-    </div>
-    <canvas id="canvas" width="400" height="450"></canvas>
-    <br/>
-
-    <script src="dumb-box.js"></script>
-    <script src="sticky.js"></script>
-    <script>
-      var game = new DumbBox('canvas', { controls: false });
-      var canvas = new Sticky('test');
-      var sum = [];
-      var blockConfig = {
-        'PushUp': {
-          fill: '#F5E867',
-          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-          title: 'Up',
-          behavior: function () {
-            sum.push('up');
-            return 0;
-          }
-        },
-        'PushDown': {
-          fill: '#FF8D4F',
-          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-          title: 'Down',
-          behavior: function () {
-            sum.push('down');
-            return 0;
-          }
-        },
-        'PushLeft': {
-          fill: '#D592F7',
-          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-          title: 'Left',
-          behavior: function () {
-            sum.push('left');
-            return 0;
-          }
-        },
-        'PushRight': {
-          fill: '#289E71',
-          ports: { data_in: 0, data_out: 0, flow_in: 1, flow_out: 1 },
-          title: 'Right',
-          behavior: function () {
-            sum.push('right');
-            return 0;
-          }
-        },
-      };
-
-      Object.keys(blockConfig).forEach(key => canvas.registerBlock(key, blockConfig[key]));
-
-      function getRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      }
-
-      function addBlock(direction) {
-        var rect = canvas.createBlock('Push' + direction);
-        rect.x = 150 + getRandomInt(-25, 25);
-        rect.y = 200 + getRandomInt(-25, 25);
-
-        canvas.addObj(rect);
-      }
-
-      window.addEventListener('keyup', function(e) {
-        var translate = { 37: 'Left', 38: 'Up', 39: 'Right', 40: 'Down' };
-        var direction = translate[e.keyCode];
-
-        if (direction) {
-          addBlock(diretion);
-        }
-      });
-
-      document.getElementById('run').onclick = function() {
-        sum = [];
-        canvas.run();
-        for (var i = 0; i < sum.length; i++) {
-          console.log(sum[i]);
-          game.player.pushMove(sum[i]);
-        }
-
-      };
-
-      document.getElementById('reset').onclick = function() {
-        game.reset();
-      };
-
-      ['Left', 'Up', 'Right', 'Down'].forEach(function(dir) {
-        document.getElementById(dir.toLowerCase()).onclick = function() {
-          addBlock(dir);
-        };
-      });
-      var map = {
-        initialPos: [1, 0],
-        tiled: [
-          "10100000",
-          "00110101",
-          "01000101",
-          "00101000",
-          "10001011"
-        ]
-      };
-
-      var map2 = [
-        "0000000000",
-        "0000000000",
-        "0000000000"
-      ];
-      game.loadMap(50, map, { 0: 'red', 1: 'blue' });
-      game.start();
-    </script>
+    <h3>Examples</h3>
+    <ul>
+      <li>
+        <a href="examples/alert/index.html" target="example">Alert</a>
+      </li>
+      <li>
+        <a href="examples/dumb-box/index.html" target="example">Dumb Box</a>
+      </li>
+    </ul>
+    <iframe name="example" src="examples/alert/index.html" style="width: 100%; height: 85vh;"></iframe>
   </body>
 </html>
